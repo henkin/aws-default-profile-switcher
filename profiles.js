@@ -3,13 +3,17 @@ var fs = require('fs')
     , path = require('path')
     , colors = require('colors')
 
+let home = process.env[(process.platform == 'win32') ? 'USERPROFILE' : 'HOME'];
+let profilePath = path.resolve(home, '.aws/credentials');
+
 function getProfiles() {
-    let home = process.env[(process.platform == 'win32') ? 'USERPROFILE' : 'HOME'];
-    var profiles = ini.parse(fs.readFileSync(path.join(home, '.aws/credentials'), 'utf-8'))
+    var profiles = ini.parse(fs.readFileSync(profilePath, 'utf-8'))
     return profiles;
 }
 
 function saveProfiles(profiles) {
+    let profileString = ini.stringify(profiles);
+    fs.writeFileSync(profilePath, profileString)
 }
 
 function printProfile(profileName, profile, isHighlight, longestNameLength) {
@@ -21,14 +25,14 @@ function printProfile(profileName, profile, isHighlight, longestNameLength) {
     console.log(`${name}: id: ${id}, key: ${key}`);
 }
 
-function profile() {
+function printProfiles() {
     var config = getProfiles();
 
     function getDefault(config) {
         let defaultAccessKeyId = config.default.aws_access_key_id;
 
         let longestNameLength = Object.keys(config).reduce(function (a, b) { return a.length > b.length ? a : b; }).length;
-        let profile; //= Object.keys(config).find(k => config[k].aws_access_key_id === defaultAccessKeyId && k != 'default' && config[k]);
+        let profile;
         for (let matchedProfile in config) {
             let matched = config[matchedProfile];
             if (matched.aws_access_key_id == defaultAccessKeyId && matchedProfile != 'default') {
@@ -43,28 +47,19 @@ function profile() {
                 printProfile(matchedProfile, config[matchedProfile], false, longestNameLength)
     }
 
-    //console.log(config)
     return getDefault(config);
 }
 
 function setProfile(name) {
     var config = getProfiles();
 
-    let defaultAccessKeyId = config.default.aws_access_key_id;
-
-    function replaceProfile(name, newProfile) {
-        config[name].aws_access_key_id = newProfile.aws_access_key_id;
-        config[name].aws_secret_access_key = newProfile.aws_secret_access_key;
-    }
-
     for (let matchedProfile in config) {
-        if (matchedProfile.substring(0, name.length) == name) {
-            console.log("assign " + matchedProfile, JSON.stringify(config[matchedProfile]));
+        if (matchedProfile !== "default" && matchedProfile.substring(0, name.length) == name) {
+            //console.log("assign " + matchedProfile)//, JSON.stringify(config[matchedProfile]));
             Object.assign(config.default, config[matchedProfile]);
+            saveProfiles(config);
         }
     }
-
-    saveProfiles(config);
 }
 
-module.exports = { profile, setProfile };
+module.exports = { printProfiles, setProfile };

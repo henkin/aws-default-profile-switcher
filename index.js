@@ -2,8 +2,8 @@
 
 let profiles = require('./profiles')
 
-let argv = process.argv[2];
-if (argv)
-    profiles.setProfile(argv);
+let nameArg = process.argv[2];
+if (nameArg)
+    profiles.setProfile(nameArg);
 
-console.log(profiles.profile());
+profiles.printProfiles();

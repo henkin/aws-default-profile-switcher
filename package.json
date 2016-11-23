@@ -9,12 +9,11 @@
   "bin": {
     "aps": "aps.sh"
   },
-  "author": "paul henkin",
-  "license": "ISC",
+  "author": "pavel henkin",
+  "license": "MIT",
   "dependencies": {
     "colors": "^1.1.2",
     "ini": "^1.3.4",
-    "lodash": "^4.17.2",
     "yargs": "^6.4.0"
   }
 }
