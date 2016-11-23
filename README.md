@@ -1,6 +1,9 @@
 # aws-default-profile-switcher
 CLI aws default profile switcher tool. 
 
+#### Install
+`npm install -g aws-default-profile-switcher`
+
 #### Usage
 * `aps` show all profiles with the default profile selected
 * `aps bob` or `aps b` switch to bob account (first beginning-of-string match)
