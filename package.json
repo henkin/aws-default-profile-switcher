@@ -1,5 +1,5 @@
 {
-  "name": "aps",
+  "name": "aws-default-profile-switcher",
   "version": "0.1.0",
   "description": "CLI aws default profile switcher tool. ",
   "main": "index.js",

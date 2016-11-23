@@ -5,6 +5,8 @@ var fs = require('fs')
 
 let home = process.env[(process.platform == 'win32') ? 'USERPROFILE' : 'HOME'];
 let profilePath = path.resolve(home, '.aws/credentials');
+if (!fs.existsSync(profilePath))
+    throw new Error(`no ${profilePath} found`);
 
 function getProfiles() {
     var profiles = ini.parse(fs.readFileSync(profilePath, 'utf-8'))
@@ -26,32 +28,27 @@ function printProfile(profileName, profile, isHighlight, longestNameLength) {
 }
 
 function printProfiles() {
-    var config = getProfiles();
+    let config = getProfiles();
+    let defaultAccessKeyId = config.default.aws_access_key_id;
 
-    function getDefault(config) {
-        let defaultAccessKeyId = config.default.aws_access_key_id;
-
-        let longestNameLength = Object.keys(config).reduce(function (a, b) { return a.length > b.length ? a : b; }).length;
-        let profile;
-        for (let matchedProfile in config) {
-            let matched = config[matchedProfile];
-            if (matched.aws_access_key_id == defaultAccessKeyId && matchedProfile != 'default') {
-                profile = matched;
-                printProfile(matchedProfile, profile, true, longestNameLength)
-                break;
-            }
+    let longestNameLength = Object.keys(config).reduce(function (a, b) { return a.length > b.length ? a : b; }).length;
+    let profile;
+    for (let matchedProfile in config) {
+        let matched = config[matchedProfile];
+        if (matched.aws_access_key_id == defaultAccessKeyId && matchedProfile != 'default') {
+            profile = matched;
+            printProfile(matchedProfile, profile, true, longestNameLength)
+            break;
         }
-
-        for (let matchedProfile in config)
-            if (matchedProfile != 'default' && config[matchedProfile] != profile)
-                printProfile(matchedProfile, config[matchedProfile], false, longestNameLength)
     }
 
-    return getDefault(config);
+    for (let matchedProfile in config)
+        if (matchedProfile != 'default' && config[matchedProfile] != profile)
+            printProfile(matchedProfile, config[matchedProfile], false, longestNameLength)
 }
 
 function setProfile(name) {
-    var config = getProfiles();
+    let config = getProfiles();
 
     for (let matchedProfile in config) {
         if (matchedProfile !== "default" && matchedProfile.substring(0, name.length) == name) {
